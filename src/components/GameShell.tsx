@@ -1,4 +1,3 @@
-// Shared frame for the game pages: back link, instructions and the end-of-round result.
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, RotateCcw, Trophy } from "lucide-react";
 import { store, type TaskKind } from "@/lib/store";

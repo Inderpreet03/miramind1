@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   ArrowRight,
   Check,
-  Heart,
   LockKeyhole,
   ShieldCheck,
   UserRound,
@@ -62,28 +61,26 @@ export function LoginScreen() {
         <div className="auth-story-inner">
           <BrandLogo className="auth-brand" />
           <div className="auth-copy">
-            <p className="eyebrow text-white/70">
-              A familiar place for every day
-            </p>
+            <p className="eyebrow text-white/70">MiraMind memory care</p>
             <h1>
-              Small moments.
+              Practice with people
               <br />
-              Meaningful progress.
+              and memories you know.
             </h1>
             <p>
-              Gentle memory activities, family connections and progress that
-              stays private to each profile.
+              Short memory activities, family messages and a clear record of
+              each session, all in one place.
             </p>
           </div>
           <div className="auth-points">
             <div>
-              <Check /> Personal session history
+              <Check /> Five short memory activities
             </div>
             <div>
-              <Check /> A separate space for every user
+              <Check /> Family messages in today&apos;s session
             </div>
             <div>
-              <Check /> Calm, easy-to-read activities
+              <Check /> Separate progress for each profile
             </div>
           </div>
         </div>
@@ -95,18 +92,14 @@ export function LoginScreen() {
             <BrandLogo />
           </div>
           <div className="auth-icon">
-            <Heart />
+            <LockKeyhole />
           </div>
-          <p className="eyebrow">Welcome to MiraMind</p>
-          <h2>
-            {mode === "signin"
-              ? "Sign in to your space"
-              : "Create your profile"}
-          </h2>
+          <p className="eyebrow">Your MiraMind profile</p>
+          <h2>{mode === "signin" ? "Sign in" : "Create your profile"}</h2>
           <p className="auth-intro">
             {mode === "signin"
-              ? "Continue where you left off."
-              : "Your progress will be kept separate on this device."}
+              ? "Use the email address and PIN for this profile."
+              : "This keeps your session history separate from other people using this device."}
           </p>
 
           <div
@@ -195,7 +188,7 @@ export function LoginScreen() {
           </form>
 
           <p className="auth-note">
-            <ShieldCheck /> Profiles and progress are stored on this device.
+            <ShieldCheck /> Account details and progress stay in this browser.
           </p>
         </div>
       </section>

@@ -115,7 +115,6 @@ function PlayHub() {
         </div>
       </header>
 
-      {/* Family tasks queue */}
       <section className="mt-10">
         <h2 className="font-display text-2xl flex items-center gap-2">
           <span className="text-accent">♥</span> From your family
@@ -171,7 +170,6 @@ function PlayHub() {
         </div>
       </section>
 
-      {/* Games */}
       <section className="mt-12">
         <h2 className="font-display text-2xl">Games</h2>
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">

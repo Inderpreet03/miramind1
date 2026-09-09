@@ -1,13 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  ArrowRight,
-  Brain,
-  CheckCircle2,
-  Heart,
-  Play,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { ArrowRight, Brain, Heart, Play, Users } from "lucide-react";
 import { useStore, useMounted } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
 
@@ -18,12 +10,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Gentle memory activities, family connection and personal progress in one place.",
+          "Memory activities, family messages and session history for each MiraMind profile.",
       },
       { property: "og:title", content: "MiraMind" },
       {
         property: "og:description",
-        content: "Gentle memory activities and meaningful family connection.",
+        content: "Memory activities, family messages and session history.",
       },
     ],
   }),
@@ -47,18 +39,17 @@ function Index() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 pb-28">
-      <section className="grid items-center gap-10 pt-10 lg:grid-cols-[1.03fr_0.97fr] lg:pt-16">
+      <section className="grid items-start gap-8 pt-10 lg:grid-cols-[0.9fr_1.1fr] lg:pt-14">
         <div>
-          <p className="eyebrow flex items-center gap-2">
-            <Sparkles className="size-4" /> Your calm daily routine
-          </p>
-          <h1 className="mt-4 max-w-2xl font-display text-5xl font-bold leading-[1.02] tracking-[-0.035em] sm:text-6xl">
-            Every memory holds
-            <br />a little <span className="text-primary">connection.</span>
+          <p className="eyebrow">Today&apos;s session</p>
+          <h1 className="mt-3 max-w-2xl font-display text-4xl font-bold leading-tight tracking-[-0.025em] sm:text-5xl">
+            Ready when you are,
+            <br />
+            <span className="text-primary">{resident.name}.</span>
           </h1>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-            Gentle activities that meet {resident.name} where they are, with
-            familiar faces and messages from the people who matter most.
+            Start with a short memory warm-up, then open the messages your
+            family has added. Take as much time as you need.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -71,65 +62,62 @@ function Index() {
               to="/family"
               className="btn-large border border-border bg-card text-foreground hover:bg-secondary"
             >
-              <Heart className="size-5 text-accent" /> Open family space
+              <Heart className="size-5 text-accent" /> View family messages
             </Link>
           </div>
-          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-success" /> No pressure or
-              countdowns
-            </span>
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="size-4 text-success" /> Adapts gently
-              over time
-            </span>
+          <div className="mt-8 grid max-w-xl grid-cols-2 gap-4 border-t border-border pt-5 text-sm">
+            <div>
+              <span className="block text-muted-foreground">Current level</span>
+              <strong>Level {resident.difficulty}</strong>
+            </div>
+            <div>
+              <span className="block text-muted-foreground">
+                Family messages
+              </span>
+              <strong>{openTasks} waiting</strong>
+            </div>
           </div>
         </div>
 
-        <div className="relative">
-          <div className="absolute -left-8 top-14 h-44 w-44 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute -right-8 bottom-8 h-44 w-44 rounded-full bg-success/15 blur-3xl" />
-          <div className="card-soft relative overflow-hidden p-6 sm:p-8">
-            <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-primary via-success to-[#9f8be8]" />
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="eyebrow">Today for</p>
-                <h2 className="mt-1 text-3xl">{resident.name}</h2>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  A gentle plan, ready when you are.
-                </p>
-              </div>
-              <div className="grid size-14 place-items-center rounded-2xl bg-secondary text-primary">
-                <Brain />
-              </div>
+        <div className="card-soft p-6 sm:p-8">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="eyebrow">Session plan</p>
+              <h2 className="mt-1 text-3xl">Three things to do</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                You can stop or change activities at any time.
+              </p>
             </div>
-
-            <div className="mt-7 space-y-3">
-              <PlanRow
-                icon={<Brain />}
-                title="A short memory warm-up"
-                detail={`Level ${resident.difficulty} · about 4 minutes`}
-              />
-              <PlanRow
-                icon={<Heart />}
-                title="A moment from family"
-                detail={`${openTasks} ${openTasks === 1 ? "message" : "messages"} waiting`}
-                accent
-              />
-              <PlanRow
-                icon={<Sparkles />}
-                title="Finish with a favourite game"
-                detail="Choose anything that feels good"
-              />
+            <div className="grid size-14 place-items-center rounded-2xl bg-secondary text-primary">
+              <Brain />
             </div>
-
-            <Link
-              to="/play"
-              className="mt-6 flex min-h-14 items-center justify-between rounded-2xl bg-foreground px-5 font-semibold text-white transition hover:bg-primary"
-            >
-              Open today's plan <ArrowRight className="size-5" />
-            </Link>
           </div>
+
+          <div className="mt-7 space-y-3">
+            <PlanRow
+              icon={<Brain />}
+              title="Memory warm-up"
+              detail={`Level ${resident.difficulty} · about 4 minutes`}
+            />
+            <PlanRow
+              icon={<Heart />}
+              title="A moment from family"
+              detail={`${openTasks} ${openTasks === 1 ? "message" : "messages"} waiting`}
+              accent
+            />
+            <PlanRow
+              icon={<Play />}
+              title="Choose another game"
+              detail="Pick from five activities"
+            />
+          </div>
+
+          <Link
+            to="/play"
+            className="mt-6 flex min-h-14 items-center justify-between rounded-2xl bg-foreground px-5 font-semibold text-white transition hover:bg-primary"
+          >
+            Open today's plan <ArrowRight className="size-5" />
+          </Link>
         </div>
       </section>
 
@@ -151,30 +139,21 @@ function Index() {
         />
       </section>
 
-      <section className="mt-16 rounded-3xl border border-border bg-card/70 p-6 sm:p-8">
-        <div className="grid gap-6 lg:grid-cols-[0.7fr_1.3fr] lg:items-center">
+      <section className="mt-12 rounded-2xl border border-border bg-card p-6 sm:p-7">
+        <div className="flex flex-wrap items-center justify-between gap-5">
           <div>
-            <p className="eyebrow">Your private space</p>
-            <h2 className="mt-2 text-3xl">Welcome back, {user?.name}.</h2>
-            <p className="mt-3 text-muted-foreground">
-              Your activities, family updates and progress are kept in this
-              profile.
+            <p className="eyebrow">Signed-in profile</p>
+            <h2 className="mt-1 text-2xl">{user?.name}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {user?.email} · Data for this profile is stored in this browser.
             </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Pillar
-              title="Play"
-              body="Five focused activities with clear, reassuring guidance."
-            />
-            <Pillar
-              title="Connect"
-              body="Keep familiar people and personal messages close."
-            />
-            <Pillar
-              title="Notice"
-              body="See patterns without turning care into a scorecard."
-            />
-          </div>
+          <Link
+            to="/staff"
+            className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-border px-4 font-semibold hover:bg-secondary"
+          >
+            View session history <ArrowRight className="size-4" />
+          </Link>
         </div>
       </section>
     </main>
@@ -227,15 +206,6 @@ function Metric({
         </div>
         <div className="mt-1 text-sm text-muted-foreground">{label}</div>
       </div>
-    </div>
-  );
-}
-
-function Pillar({ title, body }: { title: string; body: string }) {
-  return (
-    <div className="rounded-2xl bg-secondary/55 p-4">
-      <h3 className="text-xl">{title}</h3>
-      <p className="mt-1 text-sm text-muted-foreground">{body}</p>
     </div>
   );
 }

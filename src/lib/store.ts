@@ -3,10 +3,10 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 export type FamilyMember = {
   id: string;
   name: string;
-  relation: string; // e.g. "Daughter", "Grandson"
-  emoji: string; // simple visual avatar
-  note?: string; // a memory cue, e.g. "Lives in Berlin, loves sunflowers"
-  birthday?: string; // ISO date string
+  relation: string;
+  emoji: string;
+  note?: string;
+  birthday?: string;
 };
 
 export type TaskKind =
@@ -22,7 +22,7 @@ export type FamilyTask = {
   kind: TaskKind;
   title: string;
   detail?: string;
-  assignedBy: string; // family member name
+  assignedBy: string;
   createdAt: number;
   completedAt?: number;
 };
@@ -30,16 +30,16 @@ export type FamilyTask = {
 export type GameSession = {
   id: string;
   kind: TaskKind;
-  accuracy: number; // 0..1
+  accuracy: number;
   avgResponseMs: number;
-  difficulty: number; // 1..5
+  difficulty: number;
   durationMs: number;
   at: number;
 };
 
 export type Resident = {
   name: string;
-  difficulty: number; // current difficulty 1..5
+  difficulty: number;
   streakDays: number;
 };
 
@@ -239,7 +239,6 @@ export function useStore<T>(selector: (s: AppState) => T): T {
   );
 }
 
-// SSR-safe mount flag (prevents hydration mismatches when reading localStorage)
 export function useMounted() {
   const [m, setM] = useState(false);
   useEffect(() => setM(true), []);

@@ -51,7 +51,7 @@ function FamilyHub() {
             Family hub
           </p>
           <h1 className="font-display text-4xl sm:text-5xl mt-1">
-            Be there, every day.
+            Messages and activity
           </h1>
           <p className="mt-2 text-muted-foreground max-w-2xl">
             Send {resident.name} a small task, a photo or a voice note, then see
@@ -65,13 +65,11 @@ function FamilyHub() {
         </div>
       </header>
 
-      {/* Send a task */}
       <section className="mt-10 grid lg:grid-cols-[1.1fr_1fr] gap-6">
         <SendTaskCard />
         <ProgressCard />
       </section>
 
-      {/* Members */}
       <section className="mt-12">
         <div className="flex items-end justify-between">
           <h2 className="font-display text-2xl flex items-center gap-2">
@@ -107,7 +105,6 @@ function FamilyHub() {
         </div>
       </section>
 
-      {/* Task history */}
       <section className="mt-12">
         <h2 className="font-display text-2xl">Task history</h2>
         <ul className="mt-4 space-y-2">
@@ -228,11 +225,6 @@ function SendTaskCard() {
       >
         <MessageCircle className="size-4" /> Send
       </button>
-
-      <style>{`
-        .input { width: 100%; padding: 0.7rem 0.9rem; border-radius: 0.9rem; background: var(--color-card); border: 1px solid var(--color-border); font-size: 1rem; }
-        .input:focus { outline: 3px solid var(--color-ring); outline-offset: 2px; }
-      `}</style>
     </form>
   );
 }
