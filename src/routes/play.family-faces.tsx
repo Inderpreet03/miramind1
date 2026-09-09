@@ -16,9 +16,10 @@ function FamilyFaces() {
   const [pick, setPick] = useState<string | null>(null);
   const [startedAt] = useState(Date.now());
 
-  // `round` is a reshuffle nonce, not a value read here: bumping it re-runs the shuffle.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const order = useMemo(() => [...family].sort(() => Math.random() - 0.5), [family, round]);
+  const order = useMemo(() => {
+    void round;
+    return [...family].sort(() => Math.random() - 0.5);
+  }, [family, round]);
   const current = order[i] ?? null;
   const options = useMemo(() => {
     if (!current) return [];
@@ -35,7 +36,9 @@ function FamilyFaces() {
         title="Family Faces"
         instructions="Add at least 2 family members in the Family hub to start this game."
       >
-        <div className="card-soft p-8 text-center text-muted-foreground">No family added yet.</div>
+        <div className="card-soft p-8 text-center text-muted-foreground">
+          No family added yet.
+        </div>
       </GameShell>
     );
   }

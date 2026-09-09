@@ -26,9 +26,14 @@ function StaffDashboard() {
   const totalSessions = mounted ? sessions.length : 0;
   const avgAcc =
     mounted && sessions.length
-      ? Math.round((sessions.reduce((a, s) => a + s.accuracy, 0) / sessions.length) * 100)
+      ? Math.round(
+          (sessions.reduce((a, s) => a + s.accuracy, 0) / sessions.length) *
+            100,
+        )
       : 0;
-  const completedTasks = mounted ? tasks.filter((t) => t.completedAt).length : 0;
+  const completedTasks = mounted
+    ? tasks.filter((t) => t.completedAt).length
+    : 0;
 
   return (
     <main className="mx-auto max-w-6xl px-4 pt-10 pb-24">
@@ -37,24 +42,38 @@ function StaffDashboard() {
           <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Staff dashboard
           </p>
-          <h1 className="font-display text-4xl sm:text-5xl mt-1">Sonnenhof Pflegeheim</h1>
+          <h1 className="font-display text-4xl sm:text-5xl mt-1">
+            Sonnenhof Pflegeheim
+          </h1>
           <p className="mt-2 text-muted-foreground">
-            3 residents in pilot · adaptive difficulty engine v1
+            A clear view of activity, comfort and recent progress
           </p>
         </div>
         <button
           onClick={() => store.reset()}
           className="btn-large py-2 px-4 text-sm bg-card border border-border text-muted-foreground hover:bg-secondary"
         >
-          <RefreshCw className="size-4" /> Reset demo data
+          <RefreshCw className="size-4" /> Reset profile data
         </button>
       </header>
 
       <section className="mt-8 grid sm:grid-cols-4 gap-4">
         <Kpi icon={<Brain />} label="Avg accuracy" value={`${avgAcc}%`} />
-        <Kpi icon={<Activity />} label="Sessions logged" value={`${totalSessions}`} />
-        <Kpi icon={<TrendingUp />} label="Difficulty" value={`Lvl ${resident.difficulty}`} />
-        <Kpi icon={<Activity />} label="Tasks done" value={`${completedTasks}`} />
+        <Kpi
+          icon={<Activity />}
+          label="Sessions logged"
+          value={`${totalSessions}`}
+        />
+        <Kpi
+          icon={<TrendingUp />}
+          label="Difficulty"
+          value={`Lvl ${resident.difficulty}`}
+        />
+        <Kpi
+          icon={<Activity />}
+          label="Tasks done"
+          value={`${completedTasks}`}
+        />
       </section>
 
       <section className="mt-10 grid lg:grid-cols-[1.4fr_1fr] gap-6">
@@ -97,13 +116,17 @@ function StaffDashboard() {
                   className="flex items-center justify-between rounded-xl bg-secondary/60 px-3 py-2"
                 >
                   <div>
-                    <div className="font-semibold capitalize">{s.kind.replace("-", " ")}</div>
+                    <div className="font-semibold capitalize">
+                      {s.kind.replace("-", " ")}
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       {new Date(s.at).toLocaleString()}
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-display text-lg">{Math.round(s.accuracy * 100)}%</div>
+                    <div className="font-display text-lg">
+                      {Math.round(s.accuracy * 100)}%
+                    </div>
                     <div className="text-xs text-muted-foreground">
                       {Math.round(s.avgResponseMs / 100) / 10}s avg
                     </div>
@@ -133,7 +156,15 @@ function StaffDashboard() {
   );
 }
 
-function Kpi({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
+function Kpi({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="card-soft p-5">
       <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase font-semibold tracking-wider">
@@ -163,7 +194,7 @@ function Row({
         {name}{" "}
         {accent && (
           <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">
-            demo
+            current
           </span>
         )}
       </td>

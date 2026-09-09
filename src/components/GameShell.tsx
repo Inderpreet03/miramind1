@@ -69,7 +69,10 @@ export function ResultPanel({
         {correct} of {total} correct · {Math.round(avg / 100) / 10}s avg
       </p>
       <div className="mt-6 flex gap-3 justify-center">
-        <button onClick={onAgain} className="btn-large bg-primary text-primary-foreground">
+        <button
+          onClick={onAgain}
+          className="btn-large bg-primary text-primary-foreground"
+        >
           <RotateCcw className="size-4" /> Play again
         </button>
         <Link to="/play" className="btn-large bg-card border border-border">

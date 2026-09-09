@@ -8,9 +8,12 @@ export default defineConfig({
   plugins: [
     tsconfigPaths(),
     tailwindcss(),
-    // MiraMind runs entirely in the browser: no server functions, no route loaders. The build
-    // prerenders one shell (dist/client/_shell.html) and the router takes over from there.
-    tanstackStart({ spa: { enabled: true } }),
+    tanstackStart({
+      spa: {
+        enabled: true,
+        prerender: { outputPath: "/index.html" },
+      },
+    }),
     react(),
   ],
 });

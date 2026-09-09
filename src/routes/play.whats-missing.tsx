@@ -21,14 +21,18 @@ function WhatsMissing() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [round, showCount],
   );
-  const missing = useMemo(() => set[Math.floor(Math.random() * set.length)], [set]);
+  const missing = useMemo(
+    () => set[Math.floor(Math.random() * set.length)],
+    [set],
+  );
   const shown = useMemo(
     () => set.filter((s) => s !== missing).sort(() => Math.random() - 0.5),
     [set, missing],
   );
   const options = useMemo(() => {
     const opts = new Set<string>([missing]);
-    while (opts.size < 4) opts.add(ITEMS[Math.floor(Math.random() * ITEMS.length)]);
+    while (opts.size < 4)
+      opts.add(ITEMS[Math.floor(Math.random() * ITEMS.length)]);
     return Array.from(opts).sort(() => Math.random() - 0.5);
   }, [missing]);
   const [pick, setPick] = useState<string | null>(null);

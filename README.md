@@ -1,10 +1,7 @@
 # MiraMind
 
-Cognitive training for people living with early dementia, built so family can take part.
-
-Care homes already run daily memory exercises, but they are generic and the family never sees
-them. MiraMind pairs five adaptive games with a family hub, so a grandchild can send a photo, a
-voice note or a small task and have it show up in that day's session.
+MiraMind brings gentle cognitive activities, family connection and progress tracking into one
+calm, accessible experience for people living with early dementia and those who support them.
 
 ## Running it
 
@@ -36,9 +33,10 @@ src/
   styles.css       Tailwind entry and design tokens
 ```
 
-State lives in `src/lib/store.ts` and persists to `localStorage`, so a session survives a reload
-without a backend. Nothing leaves the browser, which keeps resident data out of scope for this
-prototype.
+Each person creates a local profile with their email address and a four-digit PIN. Profile records
+and session histories are stored separately in the browser so people using the same device do not
+share progress. This local account system is intended for on-device use; a production deployment
+should connect the same interface to a managed authentication and database service.
 
 ## Games
 
@@ -57,5 +55,5 @@ or past 15 seconds.
 ## Deploying
 
 Built as a static SPA and hosted on Vercel. `vercel.json` sets the output directory to
-`dist/client` and rewrites every unmatched path to the prerendered `_shell.html`, so client-side
+`dist/client` and rewrites every unmatched path to the prerendered `index.html`, so client-side
 routes such as `/play/sequence` resolve on a cold load.

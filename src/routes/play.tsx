@@ -1,5 +1,19 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { Brain, Layers, Hash, Eye, Users, MessageCircle, Check, Clock } from "lucide-react";
+import {
+  createFileRoute,
+  Link,
+  Outlet,
+  useRouterState,
+} from "@tanstack/react-router";
+import {
+  Brain,
+  Layers,
+  Hash,
+  Eye,
+  Users,
+  MessageCircle,
+  Check,
+  Clock,
+} from "lucide-react";
 import { useStore, useMounted, store, type TaskKind } from "@/lib/store";
 
 export const Route = createFileRoute("/play")({
@@ -86,12 +100,18 @@ function PlayHub() {
           <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Hello {resident.name} 👋
           </p>
-          <h1 className="font-display text-4xl sm:text-5xl mt-1">Today's session</h1>
-          <p className="mt-2 text-muted-foreground">Take your time. There is no clock today.</p>
+          <h1 className="font-display text-4xl sm:text-5xl mt-1">
+            Today's session
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            Take your time. There is no clock today.
+          </p>
         </div>
         <div className="rounded-2xl bg-card border border-border px-4 py-3 text-sm">
           <span className="text-muted-foreground">Difficulty </span>
-          <span className="font-semibold text-primary">Level {resident.difficulty}</span>
+          <span className="font-semibold text-primary">
+            Level {resident.difficulty}
+          </span>
         </div>
       </header>
 
@@ -116,7 +136,9 @@ function PlayHub() {
                   From {t.assignedBy}
                 </div>
                 <div className="font-display text-xl mt-0.5">{t.title}</div>
-                {t.detail && <p className="text-muted-foreground mt-1">{t.detail}</p>}
+                {t.detail && (
+                  <p className="text-muted-foreground mt-1">{t.detail}</p>
+                )}
                 <div className="mt-3 flex gap-2">
                   {t.kind === "family-faces" && (
                     <Link
@@ -159,7 +181,9 @@ function PlayHub() {
               to={g.to}
               className="card-soft p-6 hover:-translate-y-0.5 hover:shadow-lift transition-all group"
             >
-              <div className={`grid place-items-center size-14 rounded-2xl ${g.tone}`}>
+              <div
+                className={`grid place-items-center size-14 rounded-2xl ${g.tone}`}
+              >
                 {g.icon}
               </div>
               <div className="mt-4 font-display text-2xl">{g.title}</div>
@@ -179,10 +203,15 @@ function PlayHub() {
           </h2>
           <ul className="mt-3 space-y-2">
             {done.slice(0, 5).map((t) => (
-              <li key={t.id} className="card-soft px-4 py-3 flex justify-between items-center">
+              <li
+                key={t.id}
+                className="card-soft px-4 py-3 flex justify-between items-center"
+              >
                 <span>
                   {t.title}{" "}
-                  <span className="text-muted-foreground text-sm">from {t.assignedBy}</span>
+                  <span className="text-muted-foreground text-sm">
+                    from {t.assignedBy}
+                  </span>
                 </span>
                 <Check className="size-5 text-success" />
               </li>

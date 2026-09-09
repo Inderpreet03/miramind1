@@ -1,6 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Heart, Plus, Trash2, MessageCircle, Users, Calendar, Send } from "lucide-react";
+import {
+  Heart,
+  Plus,
+  Trash2,
+  MessageCircle,
+  Users,
+  Calendar,
+  Send,
+} from "lucide-react";
 import { useStore, store, useMounted, type TaskKind } from "@/lib/store";
 
 export const Route = createFileRoute("/family")({
@@ -26,9 +34,13 @@ function FamilyHub() {
   const sessions = useStore((s) => s.sessions);
   const resident = useStore((s) => s.resident);
 
-  const last7 = mounted ? sessions.filter((s) => Date.now() - s.at < 7 * 86400000) : [];
+  const last7 = mounted
+    ? sessions.filter((s) => Date.now() - s.at < 7 * 86400000)
+    : [];
   const avgAcc = last7.length
-    ? Math.round((last7.reduce((a, s) => a + s.accuracy, 0) / last7.length) * 100)
+    ? Math.round(
+        (last7.reduce((a, s) => a + s.accuracy, 0) / last7.length) * 100,
+      )
     : 0;
 
   return (
@@ -38,10 +50,12 @@ function FamilyHub() {
           <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Family hub
           </p>
-          <h1 className="font-display text-4xl sm:text-5xl mt-1">Be there, every day.</h1>
+          <h1 className="font-display text-4xl sm:text-5xl mt-1">
+            Be there, every day.
+          </h1>
           <p className="mt-2 text-muted-foreground max-w-2xl">
-            Send {resident.name} a small task, a photo or a voice note, then see how the session
-            went.
+            Send {resident.name} a small task, a photo or a voice note, then see
+            how the session went.
           </p>
         </div>
         <div className="grid grid-cols-3 gap-3 text-center">
@@ -70,7 +84,9 @@ function FamilyHub() {
               <div className="text-5xl">{f.emoji}</div>
               <div className="flex-1">
                 <div className="font-display text-xl">{f.name}</div>
-                <div className="text-sm text-muted-foreground">{f.relation}</div>
+                <div className="text-sm text-muted-foreground">
+                  {f.relation}
+                </div>
                 {f.note && <p className="text-sm mt-2">{f.note}</p>}
                 {f.birthday && (
                   <div className="mt-2 text-xs text-muted-foreground flex items-center gap-1">
@@ -96,14 +112,19 @@ function FamilyHub() {
         <h2 className="font-display text-2xl">Task history</h2>
         <ul className="mt-4 space-y-2">
           {tasks.slice(0, 8).map((t) => (
-            <li key={t.id} className="card-soft px-4 py-3 flex items-center justify-between gap-3">
+            <li
+              key={t.id}
+              className="card-soft px-4 py-3 flex items-center justify-between gap-3"
+            >
               <div className="flex items-center gap-3">
                 <span
                   className={`size-2.5 rounded-full ${t.completedAt ? "bg-success" : "bg-warning"}`}
                 />
                 <div>
                   <div className="font-semibold">{t.title}</div>
-                  <div className="text-xs text-muted-foreground">From {t.assignedBy}</div>
+                  <div className="text-xs text-muted-foreground">
+                    From {t.assignedBy}
+                  </div>
                 </div>
               </div>
               <div className="text-xs text-muted-foreground">
@@ -151,11 +172,17 @@ function SendTaskCard() {
       <h2 className="font-display text-2xl flex items-center gap-2">
         <Send className="size-5 text-accent" /> Send a task
       </h2>
-      <p className="text-muted-foreground text-sm mt-1">It will appear in today's session.</p>
+      <p className="text-muted-foreground text-sm mt-1">
+        It will appear in today's session.
+      </p>
 
       <div className="mt-5 grid sm:grid-cols-2 gap-3">
         <Field label="From">
-          <select value={from} onChange={(e) => setFrom(e.target.value)} className="input">
+          <select
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className="input"
+          >
             {family.map((f) => (
               <option key={f.id} value={f.name}>
                 {f.name}
@@ -195,7 +222,10 @@ function SendTaskCard() {
         />
       </Field>
 
-      <button type="submit" className="mt-4 btn-large bg-primary text-primary-foreground w-full">
+      <button
+        type="submit"
+        className="mt-4 btn-large bg-primary text-primary-foreground w-full"
+      >
         <MessageCircle className="size-4" /> Send
       </button>
 
@@ -207,10 +237,18 @@ function SendTaskCard() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block mt-3">
-      <span className="text-sm font-semibold text-muted-foreground">{label}</span>
+      <span className="text-sm font-semibold text-muted-foreground">
+        {label}
+      </span>
       <div className="mt-1">{children}</div>
     </label>
   );
@@ -227,8 +265,12 @@ function ProgressCard() {
   });
   const buckets = days.map((day) => {
     const next = day + 86400000;
-    const inDay = mounted ? sessions.filter((s) => s.at >= day && s.at < next) : [];
-    const acc = inDay.length ? inDay.reduce((a, s) => a + s.accuracy, 0) / inDay.length : 0;
+    const inDay = mounted
+      ? sessions.filter((s) => s.at >= day && s.at < next)
+      : [];
+    const acc = inDay.length
+      ? inDay.reduce((a, s) => a + s.accuracy, 0) / inDay.length
+      : 0;
     return { day, acc, count: inDay.length };
   });
   const max = Math.max(0.1, ...buckets.map((b) => b.acc));
@@ -243,17 +285,25 @@ function ProgressCard() {
           <div key={i} className="flex-1 flex flex-col items-center gap-2">
             <div
               className="w-full rounded-t-xl bg-gradient-to-t from-primary/50 to-primary transition-all"
-              style={{ height: `${(b.acc / max) * 100}%`, minHeight: b.count ? 6 : 2 }}
+              style={{
+                height: `${(b.acc / max) * 100}%`,
+                minHeight: b.count ? 6 : 2,
+              }}
               title={`${Math.round(b.acc * 100)}% across ${b.count} sessions`}
             />
             <div className="text-xs text-muted-foreground">
-              {new Date(b.day).toLocaleDateString(undefined, { weekday: "short" })[0]}
+              {
+                new Date(b.day).toLocaleDateString(undefined, {
+                  weekday: "short",
+                })[0]
+              }
             </div>
           </div>
         ))}
       </div>
       <p className="mt-4 text-sm text-muted-foreground">
-        Bars show average accuracy each day. Empty days are gentle reminders, not failures.
+        Bars show average accuracy each day. Empty days are gentle reminders,
+        not failures.
       </p>
     </div>
   );

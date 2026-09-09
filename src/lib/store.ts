@@ -1,6 +1,3 @@
-// Local-first store for the cognitive training app.
-// Persists to localStorage so families and staff can manage data without a backend.
-
 import { useEffect, useState, useSyncExternalStore } from "react";
 
 export type FamilyMember = {
@@ -53,7 +50,8 @@ type AppState = {
   sessions: GameSession[];
 };
 
-const KEY = "dct-app-state-v1";
+const LEGACY_KEY = "dct-app-state-v1";
+const USER_KEY = "miramind-user-state-v1";
 
 const seed: AppState = {
   resident: { name: "Oma Helga", difficulty: 2, streakDays: 3 },
@@ -74,7 +72,13 @@ const seed: AppState = {
       note: "Plays football, age 9.",
       birthday: "2017-09-03",
     },
-    { id: "f3", name: "Peter", relation: "Son", emoji: "👨🏻", note: "Loves gardening together." },
+    {
+      id: "f3",
+      name: "Peter",
+      relation: "Son",
+      emoji: "👨🏻",
+      note: "Loves gardening together.",
+    },
     {
       id: "f4",
       name: "Mira",
@@ -110,23 +114,46 @@ const seed: AppState = {
   sessions: [],
 };
 
-function load(): AppState {
-  if (typeof window === "undefined") return seed;
+function copySeed(): AppState {
+  return {
+    resident: { ...seed.resident },
+    family: seed.family.map((member) => ({ ...member })),
+    tasks: seed.tasks.map((task) => ({ ...task })),
+    sessions: [],
+  };
+}
+
+function keyFor(userId: string) {
+  return `${USER_KEY}:${userId}`;
+}
+
+function load(userId: string | null): AppState {
+  if (typeof window === "undefined" || !userId) return copySeed();
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return seed;
-    return { ...seed, ...JSON.parse(raw) };
+    const raw = localStorage.getItem(keyFor(userId));
+    if (raw) return { ...copySeed(), ...JSON.parse(raw) };
+
+    const legacy = localStorage.getItem(LEGACY_KEY);
+    if (legacy) {
+      const migrated = { ...copySeed(), ...JSON.parse(legacy) };
+      localStorage.setItem(keyFor(userId), JSON.stringify(migrated));
+      localStorage.removeItem(LEGACY_KEY);
+      return migrated;
+    }
+    return copySeed();
   } catch {
-    return seed;
+    return copySeed();
   }
 }
 
-let state: AppState = load();
+let activeUserId: string | null = null;
+let state: AppState = copySeed();
+const serverState = copySeed();
 const listeners = new Set<() => void>();
 
 function persist() {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(KEY, JSON.stringify(state));
+  if (typeof window !== "undefined" && activeUserId) {
+    localStorage.setItem(keyFor(activeUserId), JSON.stringify(state));
   }
   listeners.forEach((l) => l());
 }
@@ -137,12 +164,26 @@ export const store = {
     listeners.add(cb);
     return () => listeners.delete(cb);
   },
+  activateUser(userId: string) {
+    if (activeUserId === userId) return;
+    activeUserId = userId;
+    state = load(userId);
+    listeners.forEach((listener) => listener());
+  },
+  deactivateUser() {
+    activeUserId = null;
+    state = copySeed();
+    listeners.forEach((listener) => listener());
+  },
   setResident(patch: Partial<Resident>) {
     state = { ...state, resident: { ...state.resident, ...patch } };
     persist();
   },
   addFamily(m: Omit<FamilyMember, "id">) {
-    state = { ...state, family: [...state.family, { ...m, id: crypto.randomUUID() }] };
+    state = {
+      ...state,
+      family: [...state.family, { ...m, id: crypto.randomUUID() }],
+    };
     persist();
   },
   removeFamily(id: string) {
@@ -150,23 +191,33 @@ export const store = {
     persist();
   },
   addTask(t: Omit<FamilyTask, "id" | "createdAt">) {
-    const task: FamilyTask = { ...t, id: crypto.randomUUID(), createdAt: Date.now() };
+    const task: FamilyTask = {
+      ...t,
+      id: crypto.randomUUID(),
+      createdAt: Date.now(),
+    };
     state = { ...state, tasks: [task, ...state.tasks] };
     persist();
   },
   completeTask(id: string) {
     state = {
       ...state,
-      tasks: state.tasks.map((t) => (t.id === id ? { ...t, completedAt: Date.now() } : t)),
+      tasks: state.tasks.map((t) =>
+        t.id === id ? { ...t, completedAt: Date.now() } : t,
+      ),
     };
     persist();
   },
   recordSession(s: Omit<GameSession, "id" | "at">) {
-    const session: GameSession = { ...s, id: crypto.randomUUID(), at: Date.now() };
-    // Adapt difficulty per spec
+    const session: GameSession = {
+      ...s,
+      id: crypto.randomUUID(),
+      at: Date.now(),
+    };
     let d = state.resident.difficulty;
     if (s.accuracy > 0.8 && s.avgResponseMs < 5000) d = Math.min(5, d + 1);
-    else if (s.accuracy < 0.5 || s.avgResponseMs > 15000) d = Math.max(1, d - 1);
+    else if (s.accuracy < 0.5 || s.avgResponseMs > 15000)
+      d = Math.max(1, d - 1);
     state = {
       ...state,
       sessions: [session, ...state.sessions].slice(0, 200),
@@ -175,7 +226,7 @@ export const store = {
     persist();
   },
   reset() {
-    state = seed;
+    state = copySeed();
     persist();
   },
 };
@@ -184,7 +235,7 @@ export function useStore<T>(selector: (s: AppState) => T): T {
   return useSyncExternalStore(
     store.subscribe,
     () => selector(store.get()),
-    () => selector(seed),
+    () => selector(serverState),
   );
 }
 

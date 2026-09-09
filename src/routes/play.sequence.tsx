@@ -23,7 +23,11 @@ function makeQ(difficulty: number): Q {
     const offset = Math.floor(Math.random() * 6) - 3;
     if (offset !== 0) opts.add(Math.max(0, answer + offset));
   }
-  return { seq, answer, options: Array.from(opts).sort(() => Math.random() - 0.5) };
+  return {
+    seq,
+    answer,
+    options: Array.from(opts).sort(() => Math.random() - 0.5),
+  };
 }
 
 function SequenceGame() {

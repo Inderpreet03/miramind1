@@ -32,7 +32,10 @@ function CategorySort() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [round, total],
   );
-  const cats = useMemo(() => Array.from(new Set(items.map((i) => i.cat))), [items]);
+  const cats = useMemo(
+    () => Array.from(new Set(items.map((i) => i.cat))),
+    [items],
+  );
   const [idx, setIdx] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [feedback, setFeedback] = useState<null | "ok" | "no">(null);
@@ -70,7 +73,10 @@ function CategorySort() {
   }
 
   return (
-    <GameShell title="Category Sort" instructions="Which group does this belong to?">
+    <GameShell
+      title="Category Sort"
+      instructions="Which group does this belong to?"
+    >
       <div className="card-soft p-10 text-center">
         <div className="text-7xl">{current.emoji}</div>
         <div className="mt-3 font-display text-3xl">{current.word}</div>

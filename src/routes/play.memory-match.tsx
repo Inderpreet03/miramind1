@@ -42,7 +42,9 @@ function MemoryMatch() {
       if (cards[a].sym === cards[b].sym) {
         setTimeout(() => {
           setCards((cs) =>
-            cs.map((c, idx) => (idx === a || idx === b ? { ...c, matched: true } : c)),
+            cs.map((c, idx) =>
+              idx === a || idx === b ? { ...c, matched: true } : c,
+            ),
           );
           setOpen([]);
         }, 600);
@@ -55,7 +57,10 @@ function MemoryMatch() {
   const allMatched = cards.length > 0 && cards.every((c) => c.matched);
 
   return (
-    <GameShell title="Memory Match" instructions="Tap two tiles to find a matching pair.">
+    <GameShell
+      title="Memory Match"
+      instructions="Tap two tiles to find a matching pair."
+    >
       {allMatched ? (
         <ResultPanel
           kind="memory-match"
