@@ -89,6 +89,7 @@ function PlayLayout() {
 function PlayHub() {
   const mounted = useMounted();
   const resident = useStore((s) => s.resident);
+  const family = useStore((s) => s.family);
   const tasks = useStore((s) => s.tasks);
   const open = mounted ? tasks.filter((t) => !t.completedAt) : [];
   const done = mounted ? tasks.filter((t) => t.completedAt) : [];
@@ -125,56 +126,76 @@ function PlayHub() {
               No new tasks. Try a game below.
             </div>
           )}
-          {open.map((t) => (
-            <div key={t.id} className="card-soft p-5 flex items-start gap-4">
-              <div className="grid place-items-center size-12 rounded-xl bg-accent/15 text-accent">
-                {t.kind === "family-message" ? <MessageCircle /> : <Users />}
-              </div>
-              <div className="flex-1">
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                  From {t.assignedBy}
-                </div>
-                <div className="font-display text-xl mt-0.5">{t.title}</div>
-                {t.detail && (
-                  <p className="text-muted-foreground mt-1">{t.detail}</p>
+          {open.map((t) => {
+            const sender = family.find(
+              (member) => member.name === t.assignedBy,
+            );
+            return (
+              <div key={t.id} className="card-soft p-5 flex items-start gap-4">
+                {t.kind === "family-message" ? (
+                  sender?.image ? (
+                    <img
+                      src={sender.image}
+                      alt={`${t.assignedBy}'s profile`}
+                      className="family-photo-small"
+                    />
+                  ) : (
+                    <div className="family-photo-placeholder family-photo-small">
+                      {sender?.emoji ?? <MessageCircle className="size-6" />}
+                    </div>
+                  )
+                ) : (
+                  <div className="grid place-items-center size-12 rounded-xl bg-accent/15 text-accent">
+                    <Users />
+                  </div>
                 )}
-                {t.voiceNote && (
-                  <audio
-                    controls
-                    src={t.voiceNote}
-                    className="voice-note-player"
-                    aria-label={`Voice note from ${t.assignedBy}`}
-                  />
-                )}
-                <div className="mt-3 flex gap-2">
-                  {t.kind === "family-faces" && (
-                    <Link
-                      to="/play/family-faces"
-                      className="btn-large py-2 px-4 text-base bg-primary text-primary-foreground"
-                    >
-                      Start
-                    </Link>
+                <div className="flex-1">
+                  <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                    From {t.assignedBy}
+                  </div>
+                  <div className="font-display text-xl mt-0.5">{t.title}</div>
+                  {t.detail && (
+                    <p className="text-muted-foreground mt-1">{t.detail}</p>
                   )}
-                  {t.kind === "family-message" && (
-                    <button
-                      onClick={() => store.completeTask(t.id)}
-                      className="btn-large py-2 px-4 text-base bg-primary text-primary-foreground"
-                    >
-                      <Check className="size-4" /> Mark heard
-                    </button>
+                  {t.voiceNote && (
+                    <audio
+                      controls
+                      src={t.voiceNote}
+                      className="voice-note-player"
+                      aria-label={`Voice note from ${t.assignedBy}`}
+                    />
                   )}
-                  {t.kind !== "family-faces" && t.kind !== "family-message" && (
-                    <Link
-                      to={`/play/${t.kind}`}
-                      className="btn-large py-2 px-4 text-base bg-primary text-primary-foreground"
-                    >
-                      Open game
-                    </Link>
-                  )}
+                  <div className="mt-3 flex gap-2">
+                    {t.kind === "family-faces" && (
+                      <Link
+                        to="/play/family-faces"
+                        className="btn-large py-2 px-4 text-base bg-primary text-primary-foreground"
+                      >
+                        Start
+                      </Link>
+                    )}
+                    {t.kind === "family-message" && (
+                      <button
+                        onClick={() => store.completeTask(t.id)}
+                        className="btn-large py-2 px-4 text-base bg-primary text-primary-foreground"
+                      >
+                        <Check className="size-4" /> Mark heard
+                      </button>
+                    )}
+                    {t.kind !== "family-faces" &&
+                      t.kind !== "family-message" && (
+                        <Link
+                          to={`/play/${t.kind}`}
+                          className="btn-large py-2 px-4 text-base bg-primary text-primary-foreground"
+                        >
+                          Open game
+                        </Link>
+                      )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
