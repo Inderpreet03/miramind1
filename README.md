@@ -49,6 +49,9 @@ the password hash and the activity data stay on that device.
 4. Add the same `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values to the hosted site's
    environment variables, then rebuild and deploy.
 
+The `VITE_` values are embedded during the static build, so a new build is required after changing
+them. The publishable key is safe for browser use; never add a Supabase service-role key here.
+
 The client only uses Supabase's publishable key. Row-level security policies in the schema protect
 write access, and the shared care-team policy lets signed-in users read the roster and activity
 needed by the Staff page. Keep real clinical records out of a prototype until privacy, consent,
