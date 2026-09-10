@@ -102,7 +102,7 @@ function StaffDashboardContent() {
             Staff dashboard
           </p>
           <h1 className="font-display text-4xl sm:text-5xl mt-1">
-            Sonnenhof Pflegeheim
+            Resident progress
           </h1>
           <p className="mt-2 text-muted-foreground">
             A clear view of activity, comfort and recent progress
