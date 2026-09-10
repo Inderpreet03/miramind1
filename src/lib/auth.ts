@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from "react";
 import { store } from "@/lib/store";
-import { cloudPassword, isCloudConfigured, supabase } from "@/lib/supabase";
+import { cloudPassword, supabase } from "@/lib/supabase";
 
 export type UserAccount = {
   id: string;
@@ -201,11 +201,14 @@ export const authStore = {
 };
 
 if (supabase) {
-  void supabase.auth.getSession().then(({ data, error }) => {
-    if (!error) void publishCloudUser(data.session?.user ?? null);
-  });
+  void supabase.auth
+    .getSession()
+    .then(({ data, error }) => {
+      if (!error) void publishCloudUser(data.session?.user ?? null);
+    })
+    .catch(() => undefined);
   supabase.auth.onAuthStateChange((_event, session) => {
-    void publishCloudUser(session?.user ?? null);
+    void publishCloudUser(session?.user ?? null).catch(() => undefined);
   });
 }
 
