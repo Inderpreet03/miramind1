@@ -17,6 +17,11 @@ import {
   type UserStateSummary,
 } from "@/lib/store";
 
+type ResidentAccountRow = {
+  account: PublicUserAccount;
+  summary: UserStateSummary;
+};
+
 export const Route = createFileRoute("/staff")({
   head: () => ({
     meta: [
@@ -47,10 +52,33 @@ function StaffDashboardContent() {
   const tasks = useStore((s) => s.tasks);
   const [residentName, setResidentName] = useState(resident.name);
   const [savedName, setSavedName] = useState(false);
+  const [remoteRows, setRemoteRows] = useState<ResidentAccountRow[]>([]);
 
   useEffect(() => {
     setResidentName(resident.name);
   }, [resident.name]);
+
+  useEffect(() => {
+    if (!mounted) return;
+    let cancelled = false;
+    void authStore
+      .listAccountsAsync()
+      .then(async (accountList) => {
+        const nextRows = await Promise.all(
+          accountList.map(async (account) => ({
+            account,
+            summary: await store.summaryForAsync(account.id),
+          })),
+        );
+        if (!cancelled) setRemoteRows(nextRows);
+      })
+      .catch(() => {
+        if (!cancelled) setRemoteRows([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [mounted, resident.name, sessions.length, tasks.length, user?.id]);
 
   const recent = mounted ? sessions.slice(0, 8) : [];
   const totalSessions = mounted ? sessions.length : 0;
@@ -65,7 +93,7 @@ function StaffDashboardContent() {
     ? tasks.filter((t) => t.completedAt).length
     : 0;
   const accounts = mounted ? authStore.listAccounts() : [];
-  const rows = accounts.length
+  const localRows: ResidentAccountRow[] = accounts.length
     ? accounts.map((account) => ({
         account,
         summary: store.summaryFor(account.id),
@@ -84,6 +112,7 @@ function StaffDashboardContent() {
           },
         ]
       : [];
+  const rows = remoteRows.length ? remoteRows : localRows;
 
   function saveResidentName(event: React.FormEvent) {
     event.preventDefault();

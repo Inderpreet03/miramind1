@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Brain, Heart, Play, Users } from "lucide-react";
 import { useStore, useMounted } from "@/lib/store";
 import { useAuth } from "@/lib/auth";
+import { isCloudConfigured } from "@/lib/supabase";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -143,7 +144,10 @@ function Index() {
             <p className="eyebrow">Signed-in profile</p>
             <h2 className="mt-1 text-2xl">{user?.name}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              {user?.email} · Data for this profile is stored in this browser.
+              {user?.email} ·{" "}
+              {isCloudConfigured
+                ? "Synced across devices."
+                : "Stored in this browser."}
             </p>
           </div>
           <Link

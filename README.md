@@ -33,14 +33,26 @@ src/
   styles.css       Tailwind entry and design tokens
 ```
 
-Each person creates a local profile with their email address and a four-digit PIN. Profile records
-and session histories are stored separately in the browser so people using the same device do not
-share progress. This local account system is intended for on-device use; a production deployment
-should connect the same interface to a managed authentication and database service.
+Each person creates a local profile with their email address and a four-digit PIN. If Supabase is
+configured, profile records, family tasks, media and session histories sync across devices. Without
+the cloud settings, the app falls back to separate browser storage so it can still be used locally.
 
 The Family hub accepts loved-one photos and short voice notes. The Staff page keeps a separate
 resident summary for each local account and is protected by a staff password set on first visit;
 the password hash and the activity data stay on that device.
+
+## Shared cloud mode
+
+1. Create a free Supabase project.
+2. Run [`supabase/schema.sql`](supabase/schema.sql) once in the Supabase SQL editor.
+3. Copy `.env.example` to `.env` and fill in the project URL and publishable key.
+4. Add the same `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` values to the hosted site's
+   environment variables, then rebuild and deploy.
+
+The client only uses Supabase's publishable key. Row-level security policies in the schema protect
+write access, and the shared care-team policy lets signed-in users read the roster and activity
+needed by the Staff page. Keep real clinical records out of a prototype until privacy, consent,
+retention and access policies have been reviewed.
 
 ## Games
 

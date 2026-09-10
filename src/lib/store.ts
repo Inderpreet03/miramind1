@@ -1,4 +1,11 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
+import {
+  fetchCloudState,
+  fetchCloudSummary,
+  saveCloudState,
+  summarizeState,
+} from "@/lib/cloud-data";
+import { supabase } from "@/lib/supabase";
 
 export type FamilyMember = {
   id: string;
@@ -184,8 +191,28 @@ const listeners = new Set<() => void>();
 function persist() {
   if (typeof window !== "undefined" && activeUserId) {
     localStorage.setItem(keyFor(activeUserId), JSON.stringify(state));
+    if (supabase) {
+      void saveCloudState(activeUserId, state).catch(() => undefined);
+    }
   }
   listeners.forEach((l) => l());
+}
+
+async function hydrateFromCloud(userId: string) {
+  if (!supabase) return;
+  try {
+    const remote = await fetchCloudState(userId);
+    if (activeUserId !== userId) return;
+    if (remote) {
+      state = removeLegacyResidentName({ ...copySeed(), ...remote });
+      localStorage.setItem(keyFor(userId), JSON.stringify(state));
+      listeners.forEach((listener) => listener());
+    } else {
+      await saveCloudState(userId, state);
+    }
+  } catch {
+    // Keep the cached state usable while the cloud project is being configured.
+  }
 }
 
 export const store = {
@@ -195,20 +222,25 @@ export const store = {
     return () => listeners.delete(cb);
   },
   summaryFor(userId: string): UserStateSummary {
-    const userState = load(userId);
-    return {
-      resident: userState.resident,
-      familyCount: userState.family.length,
-      sessionsCount: userState.sessions.length,
-      tasksCompleted: userState.tasks.filter((task) => task.completedAt).length,
-      lastSessionAt: userState.sessions[0]?.at ?? null,
-    };
+    return summarizeState(load(userId));
+  },
+  async summaryForAsync(userId: string): Promise<UserStateSummary> {
+    if (supabase) {
+      try {
+        const remote = await fetchCloudSummary(userId);
+        if (remote) return remote;
+      } catch {
+        // Fall back to the cached state if the remote row is unavailable.
+      }
+    }
+    return this.summaryFor(userId);
   },
   activateUser(userId: string) {
     if (activeUserId === userId) return;
     activeUserId = userId;
     state = load(userId);
     listeners.forEach((listener) => listener());
+    void hydrateFromCloud(userId);
   },
   deactivateUser() {
     activeUserId = null;

@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Brain, Heart, Home, Activity, LogOut, UserRound } from "lucide-react";
 import { BrandLogo } from "@/components/BrandLogo";
 import { authStore, useAuth } from "@/lib/auth";
+import { isCloudConfigured } from "@/lib/supabase";
 
 const links = [
   { to: "/", label: "Home", icon: Home },
@@ -42,7 +43,9 @@ export function AppHeader() {
           </span>
           <span className="account-copy">
             <strong>{user?.name}</strong>
-            <small>Private profile</small>
+            <small>
+              {isCloudConfigured ? "Synced profile" : "Private profile"}
+            </small>
           </span>
           <button
             type="button"

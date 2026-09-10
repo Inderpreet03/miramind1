@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { authStore } from "@/lib/auth";
 import { BrandLogo } from "@/components/BrandLogo";
+import { isCloudConfigured } from "@/lib/supabase";
 
 type Mode = "signin" | "signup";
 
@@ -99,7 +100,9 @@ export function LoginScreen() {
           <p className="auth-intro">
             {mode === "signin"
               ? "Use the email address and PIN for this profile."
-              : "This keeps your session history separate from other people using this device."}
+              : isCloudConfigured
+                ? "Your profile and session history will sync across devices."
+                : "Your profile keeps its session history separate from other people on this device."}
           </p>
 
           <div
@@ -188,7 +191,10 @@ export function LoginScreen() {
           </form>
 
           <p className="auth-note">
-            <ShieldCheck /> Account details and progress stay in this browser.
+            <ShieldCheck />
+            {isCloudConfigured
+              ? "Shared sync is enabled for this MiraMind workspace."
+              : "Account details and progress stay in this browser until cloud sync is connected."}
           </p>
         </div>
       </section>
