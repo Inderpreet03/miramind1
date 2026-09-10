@@ -2,7 +2,11 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   fetchCloudState,
   fetchCloudSummary,
+  fetchSharedFamily,
+  removeSharedFamilyMember,
   saveCloudState,
+  saveSharedFamilyMember,
+  saveSharedFamilyMembers,
   summarizeState,
 } from "@/lib/cloud-data";
 import { supabase } from "@/lib/supabase";
@@ -202,14 +206,32 @@ async function hydrateFromCloud(userId: string) {
   if (!supabase) return;
   try {
     const remote = await fetchCloudState(userId);
-    if (activeUserId !== userId) return;
-    if (remote) {
-      state = removeLegacyResidentName({ ...copySeed(), ...remote });
-      localStorage.setItem(keyFor(userId), JSON.stringify(state));
-      listeners.forEach((listener) => listener());
-    } else {
-      await saveCloudState(userId, state);
+    let sharedFamily: FamilyMember[] = [];
+    let sharedRosterAvailable = true;
+    try {
+      sharedFamily = await fetchSharedFamily();
+    } catch {
+      sharedRosterAvailable = false;
     }
+    if (activeUserId !== userId) return;
+
+    const accountState = removeLegacyResidentName({
+      ...copySeed(),
+      ...(remote ?? state),
+    });
+    const family =
+      sharedRosterAvailable && sharedFamily.length > 0
+        ? sharedFamily
+        : accountState.family;
+
+    if (sharedRosterAvailable && sharedFamily.length === 0) {
+      await saveSharedFamilyMembers(userId, family);
+    }
+
+    state = { ...accountState, family };
+    localStorage.setItem(keyFor(userId), JSON.stringify(state));
+    await saveCloudState(userId, state);
+    listeners.forEach((listener) => listener());
   } catch {
     // Keep the cached state usable while the cloud project is being configured.
   }
@@ -252,15 +274,22 @@ export const store = {
     persist();
   },
   addFamily(m: Omit<FamilyMember, "id">) {
+    const member = { ...m, id: crypto.randomUUID() };
     state = {
       ...state,
-      family: [...state.family, { ...m, id: crypto.randomUUID() }],
+      family: [...state.family, member],
     };
     persist();
+    if (supabase && activeUserId) {
+      void saveSharedFamilyMember(activeUserId, member).catch(() => undefined);
+    }
   },
   removeFamily(id: string) {
     state = { ...state, family: state.family.filter((f) => f.id !== id) };
     persist();
+    if (supabase) {
+      void removeSharedFamilyMember(id).catch(() => undefined);
+    }
   },
   addTask(t: Omit<FamilyTask, "id" | "createdAt">) {
     const task: FamilyTask = {
@@ -298,7 +327,10 @@ export const store = {
     persist();
   },
   reset() {
-    state = copySeed();
+    state = {
+      ...copySeed(),
+      ...(supabase ? { family: state.family } : {}),
+    };
     persist();
   },
 };

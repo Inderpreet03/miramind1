@@ -16,8 +16,23 @@ create table if not exists public.user_states (
   updated_at timestamptz not null default now()
 );
 
+-- The family roster is shared by every signed-in care-team user.
+create table if not exists public.shared_family_members (
+  id text primary key,
+  name text not null,
+  relation text not null default 'Family',
+  emoji text not null default '👤',
+  note text,
+  birthday text,
+  image text,
+  created_by uuid references auth.users(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 alter table public.profiles enable row level security;
 alter table public.user_states enable row level security;
+alter table public.shared_family_members enable row level security;
 
 -- MiraMind is a shared care-team workspace: signed-in users can see the
 -- resident roster and activity needed by the Staff page.
@@ -42,6 +57,20 @@ create policy "Users can create their own activity"
 create policy "Users can update their own activity"
   on public.user_states for update to authenticated
   using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+create policy "Signed-in users can view shared family"
+  on public.shared_family_members for select to authenticated using (true);
+
+create policy "Signed-in users can add shared family"
+  on public.shared_family_members for insert to authenticated
+  with check (auth.uid() is not null);
+
+create policy "Signed-in users can update shared family"
+  on public.shared_family_members for update to authenticated
+  using (true) with check (auth.uid() is not null);
+
+create policy "Signed-in users can remove shared family"
+  on public.shared_family_members for delete to authenticated using (true);
 
 -- Keep a profile row in sync for accounts created outside the MiraMind form.
 create or replace function public.handle_new_user()

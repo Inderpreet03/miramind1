@@ -14,6 +14,7 @@ import {
   Volume2,
 } from "lucide-react";
 import { useStore, store, useMounted, type TaskKind } from "@/lib/store";
+import { isCloudConfigured } from "@/lib/supabase";
 
 export const Route = createFileRoute("/family")({
   head: () => ({
@@ -69,6 +70,11 @@ function FamilyHub() {
           <p className="mt-2 text-muted-foreground max-w-2xl">
             Send {resident.name} a small task, a photo or a voice note, then see
             how the session went.
+          </p>
+          <p className="mt-2 text-sm text-primary">
+            {isCloudConfigured
+              ? "Loved ones and their photos are shared with signed-in care-team users."
+              : "Loved ones stay in this browser until cloud sync is configured."}
           </p>
         </div>
         <div className="grid grid-cols-3 gap-3 text-center">
