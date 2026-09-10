@@ -43,9 +43,7 @@ function Index() {
         <div>
           <p className="eyebrow">Today&apos;s session</p>
           <h1 className="mt-3 max-w-2xl font-display text-4xl font-bold leading-tight tracking-[-0.025em] sm:text-5xl">
-            Ready when you are,
-            <br />
-            <span className="text-primary">{resident.name}.</span>
+            Ready when you are.
           </h1>
           <p className="mt-5 max-w-xl text-lg text-muted-foreground">
             Start with a short memory warm-up, then open the messages your

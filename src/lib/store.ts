@@ -56,7 +56,7 @@ const LEGACY_KEY = "dct-app-state-v1";
 const USER_KEY = "miramind-user-state-v1";
 
 const seed: AppState = {
-  resident: { name: "Oma Helga", difficulty: 2, streakDays: 3 },
+  resident: { name: "Resident", difficulty: 2, streakDays: 3 },
   family: [
     {
       id: "f1",
@@ -129,15 +129,35 @@ function keyFor(userId: string) {
   return `${USER_KEY}:${userId}`;
 }
 
+function removeLegacyResidentName(appState: AppState) {
+  if (appState.resident.name.trim().toLowerCase() !== "oma helga") {
+    return appState;
+  }
+  return {
+    ...appState,
+    resident: { ...appState.resident, name: "Resident" },
+  };
+}
+
 function load(userId: string | null): AppState {
   if (typeof window === "undefined" || !userId) return copySeed();
   try {
     const raw = localStorage.getItem(keyFor(userId));
-    if (raw) return { ...copySeed(), ...JSON.parse(raw) };
+    if (raw) {
+      const loaded = removeLegacyResidentName({
+        ...copySeed(),
+        ...JSON.parse(raw),
+      });
+      localStorage.setItem(keyFor(userId), JSON.stringify(loaded));
+      return loaded;
+    }
 
     const legacy = localStorage.getItem(LEGACY_KEY);
     if (legacy) {
-      const migrated = { ...copySeed(), ...JSON.parse(legacy) };
+      const migrated = removeLegacyResidentName({
+        ...copySeed(),
+        ...JSON.parse(legacy),
+      });
       localStorage.setItem(keyFor(userId), JSON.stringify(migrated));
       localStorage.removeItem(LEGACY_KEY);
       return migrated;
