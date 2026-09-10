@@ -1,6 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Activity, Brain, TrendingUp, RefreshCw } from "lucide-react";
-import { useStore, useMounted, store } from "@/lib/store";
+import {
+  Activity,
+  Brain,
+  RefreshCw,
+  Save,
+  ShieldCheck,
+  TrendingUp,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { StaffAccessGate } from "@/components/StaffAccessGate";
+import { authStore, useAuth, type PublicUserAccount } from "@/lib/auth";
+import {
+  store,
+  useMounted,
+  useStore,
+  type UserStateSummary,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/staff")({
   head: () => ({
@@ -17,10 +32,25 @@ export const Route = createFileRoute("/staff")({
 });
 
 function StaffDashboard() {
+  return (
+    <StaffAccessGate>
+      <StaffDashboardContent />
+    </StaffAccessGate>
+  );
+}
+
+function StaffDashboardContent() {
   const mounted = useMounted();
+  const { user } = useAuth();
   const resident = useStore((s) => s.resident);
   const sessions = useStore((s) => s.sessions);
   const tasks = useStore((s) => s.tasks);
+  const [residentName, setResidentName] = useState(resident.name);
+  const [savedName, setSavedName] = useState(false);
+
+  useEffect(() => {
+    setResidentName(resident.name);
+  }, [resident.name]);
 
   const recent = mounted ? sessions.slice(0, 8) : [];
   const totalSessions = mounted ? sessions.length : 0;
@@ -34,10 +64,39 @@ function StaffDashboard() {
   const completedTasks = mounted
     ? tasks.filter((t) => t.completedAt).length
     : 0;
+  const accounts = mounted ? authStore.listAccounts() : [];
+  const rows = accounts.length
+    ? accounts.map((account) => ({
+        account,
+        summary: store.summaryFor(account.id),
+      }))
+    : user
+      ? [
+          {
+            account: user,
+            summary: {
+              resident,
+              familyCount: 0,
+              sessionsCount: totalSessions,
+              tasksCompleted: completedTasks,
+              lastSessionAt: sessions[0]?.at ?? null,
+            },
+          },
+        ]
+      : [];
+
+  function saveResidentName(event: React.FormEvent) {
+    event.preventDefault();
+    const nextName = residentName.trim();
+    if (!nextName || nextName === resident.name) return;
+    store.setResident({ name: nextName });
+    setSavedName(true);
+    window.setTimeout(() => setSavedName(false), 1800);
+  }
 
   return (
     <main className="mx-auto max-w-6xl px-4 pt-10 pb-24">
-      <header className="flex flex-wrap items-end justify-between gap-4">
+      <header className="flex flex-wrap items-end justify-between gap-5">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
             Staff dashboard
@@ -49,12 +108,31 @@ function StaffDashboard() {
             A clear view of activity, comfort and recent progress
           </p>
         </div>
-        <button
-          onClick={() => store.reset()}
-          className="btn-large py-2 px-4 text-sm bg-card border border-border text-muted-foreground hover:bg-secondary"
-        >
-          <RefreshCw className="size-4" /> Reset profile data
-        </button>
+        <div className="flex flex-wrap items-end gap-3">
+          <form onSubmit={saveResidentName} className="resident-name-form">
+            <label>
+              <span>Resident name</span>
+              <input
+                value={residentName}
+                onChange={(event) => setResidentName(event.target.value)}
+                className="input"
+                aria-label="Resident name"
+              />
+            </label>
+            <button
+              type="submit"
+              className="btn-large py-2 px-4 text-sm bg-primary text-primary-foreground"
+            >
+              <Save className="size-4" /> {savedName ? "Saved" : "Save"}
+            </button>
+          </form>
+          <button
+            onClick={() => store.reset()}
+            className="btn-large py-2 px-4 text-sm bg-card border border-border text-muted-foreground hover:bg-secondary"
+          >
+            <RefreshCw className="size-4" /> Reset profile data
+          </button>
+        </div>
       </header>
 
       <section className="mt-8 grid sm:grid-cols-4 gap-4">
@@ -77,29 +155,48 @@ function StaffDashboard() {
       </section>
 
       <section className="mt-10 grid lg:grid-cols-[1.4fr_1fr] gap-6">
-        <div className="card-soft p-6">
-          <h2 className="font-display text-2xl">Residents</h2>
-          <table className="mt-4 w-full text-sm">
-            <thead>
-              <tr className="text-left text-muted-foreground">
-                <th className="py-2">Resident</th>
-                <th>Difficulty</th>
-                <th>Streak</th>
-                <th>Sessions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <Row
-                name={resident.name}
-                difficulty={resident.difficulty}
-                streak={resident.streakDays}
-                sessions={totalSessions}
-                accent
-              />
-              <Row name="Herr Müller" difficulty={3} streak={5} sessions={28} />
-              <Row name="Frau Bauer" difficulty={1} streak={1} sessions={6} />
-            </tbody>
-          </table>
+        <div className="card-soft p-6 overflow-x-auto">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="font-display text-2xl">Residents</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Accounts, sessions and activity saved separately for each
+                person.
+              </p>
+            </div>
+            <span className="inline-flex items-center gap-1 rounded-full bg-success/15 px-3 py-1 text-xs font-semibold text-success-foreground">
+              <ShieldCheck className="size-3.5" /> {rows.length} account
+              {rows.length === 1 ? "" : "s"}
+            </span>
+          </div>
+          {rows.length === 0 ? (
+            <p className="mt-5 text-muted-foreground">
+              No resident accounts have been created yet.
+            </p>
+          ) : (
+            <table className="mt-4 w-full min-w-[38rem] text-sm">
+              <thead>
+                <tr className="text-left text-muted-foreground">
+                  <th className="py-2">Resident</th>
+                  <th>Account</th>
+                  <th>Difficulty</th>
+                  <th>Streak</th>
+                  <th>Sessions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map(({ account, summary }) => (
+                  <ResidentRow
+                    key={account.id}
+                    account={account}
+                    summary={summary}
+                    accent={account.id === user?.id}
+                    mounted={mounted}
+                  />
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <div className="card-soft p-6">
@@ -175,32 +272,40 @@ function Kpi({
   );
 }
 
-function Row({
-  name,
-  difficulty,
-  streak,
-  sessions,
+function ResidentRow({
+  account,
+  summary,
   accent,
+  mounted,
 }: {
-  name: string;
-  difficulty: number;
-  streak: number;
-  sessions: number;
-  accent?: boolean;
+  account: PublicUserAccount;
+  summary: UserStateSummary;
+  accent: boolean;
+  mounted: boolean;
 }) {
   return (
     <tr className="border-t border-border">
       <td className="py-3 font-semibold">
-        {name}{" "}
+        {summary.resident.name}
         {accent && (
           <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-accent/20 text-accent">
             current
           </span>
         )}
+        <div className="text-xs font-normal text-muted-foreground">
+          {account.name}
+        </div>
       </td>
-      <td>Level {difficulty}</td>
-      <td>{streak} d</td>
-      <td>{sessions}</td>
+      <td>
+        <div>{account.email}</div>
+        <div className="text-xs text-muted-foreground">
+          Created{" "}
+          {mounted ? new Date(account.createdAt).toLocaleDateString() : "—"}
+        </div>
+      </td>
+      <td>Level {summary.resident.difficulty}</td>
+      <td>{summary.resident.streakDays} d</td>
+      <td>{summary.sessionsCount}</td>
     </tr>
   );
 }

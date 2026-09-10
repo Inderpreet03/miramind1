@@ -138,6 +138,14 @@ function PlayHub() {
                 {t.detail && (
                   <p className="text-muted-foreground mt-1">{t.detail}</p>
                 )}
+                {t.voiceNote && (
+                  <audio
+                    controls
+                    src={t.voiceNote}
+                    className="voice-note-player"
+                    aria-label={`Voice note from ${t.assignedBy}`}
+                  />
+                )}
                 <div className="mt-3 flex gap-2">
                   {t.kind === "family-faces" && (
                     <Link

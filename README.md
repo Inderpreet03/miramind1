@@ -38,6 +38,10 @@ and session histories are stored separately in the browser so people using the s
 share progress. This local account system is intended for on-device use; a production deployment
 should connect the same interface to a managed authentication and database service.
 
+The Family hub accepts loved-one photos and short voice notes. The Staff page keeps a separate
+resident summary for each local account and is protected by a staff password set on first visit;
+the password hash and the activity data stay on that device.
+
 ## Games
 
 Each game reads the resident's current difficulty (1 to 5) and sizes itself to match:

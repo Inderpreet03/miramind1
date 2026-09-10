@@ -170,6 +170,134 @@
   }
 }
 
+.family-photo,
+.family-photo-placeholder {
+  width: 4.25rem;
+  height: 4.25rem;
+  flex: 0 0 auto;
+  border-radius: 1.2rem;
+  object-fit: cover;
+  background: color-mix(in oklab, var(--color-secondary) 82%, white);
+}
+.family-photo-placeholder {
+  display: grid;
+  place-items: center;
+  font-size: 2.7rem;
+}
+.family-photo-small {
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 0.8rem;
+}
+.family-photo-game {
+  width: min(15rem, 70vw);
+  height: min(15rem, 70vw);
+  border-radius: 2rem;
+}
+.voice-note-preview,
+.voice-note-player {
+  width: 100%;
+  height: 2.55rem;
+  margin-top: 0.7rem;
+  accent-color: var(--color-primary);
+}
+.voice-note-player {
+  max-width: 28rem;
+}
+.resident-name-form {
+  display: flex;
+  align-items: end;
+  gap: 0.55rem;
+}
+.resident-name-form label {
+  min-width: 12rem;
+}
+.resident-name-form label > span {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--color-muted-foreground);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.resident-name-form .input {
+  min-height: 2.8rem;
+  padding-block: 0.5rem;
+}
+.staff-access-gate {
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - 6rem);
+  padding: 2rem 1rem 6rem;
+}
+.staff-password-card {
+  width: min(100%, 30rem);
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  border: 1px solid var(--color-border);
+  border-radius: 1.5rem;
+  background: var(--color-card);
+  box-shadow: var(--shadow-lift);
+}
+.staff-password-icon {
+  display: grid;
+  place-items: center;
+  width: 3.35rem;
+  height: 3.35rem;
+  margin-bottom: 1.2rem;
+  border-radius: 1rem;
+  color: var(--color-primary);
+  background: color-mix(in oklab, var(--color-primary) 13%, white);
+}
+.staff-password-icon svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+.staff-access-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem max(1rem, calc((100vw - 72rem) / 2));
+  color: var(--color-success-foreground);
+  background: color-mix(in oklab, var(--color-success) 12%, white);
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-success) 22%, var(--color-border));
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.staff-access-bar > span,
+.staff-access-bar > div {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.text-button {
+  border-radius: 0.65rem;
+  padding: 0.35rem 0.55rem;
+  color: var(--color-muted-foreground);
+  transition: 160ms ease;
+}
+.text-button:hover {
+  color: var(--color-foreground);
+  background: color-mix(in oklab, var(--color-success) 12%, white);
+}
+
+@media (max-width: 640px) {
+  .resident-name-form {
+    width: 100%;
+  }
+  .resident-name-form label {
+    flex: 1;
+  }
+  .staff-access-bar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.6rem 1rem;
+  }
+}
+
 .app-header {
   position: sticky;
   top: 0;
@@ -181,7 +309,7 @@
 }
 
 .app-header > div {
-  min-height: 4.75rem;
+  min-height: 4.2rem;
 }
 .brand-link {
   display: inline-flex;
@@ -190,13 +318,13 @@
 }
 .brand-logo {
   display: block;
-  width: 10.5rem;
-  height: 6.1rem;
-  background: url("/miramind-logo.png") center 51% / 225% auto no-repeat;
+  width: 7.8rem;
+  height: 4.35rem;
+  background: url("/miramind-logo.png") center 51% / 238% auto no-repeat;
 }
 .brand-logo-compact {
-  width: 8rem;
-  height: 4.45rem;
+  width: 5.4rem;
+  height: 3.15rem;
 }
 .main-nav {
   display: flex;
@@ -310,8 +438,8 @@
 .auth-brand {
   align-self: flex-start;
   background-color: white;
-  border-radius: 1rem;
-  box-shadow: 0 20px 50px -28px oklch(0.16 0.08 240);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 28px -20px oklch(0.16 0.08 240);
 }
 .auth-copy {
   margin: auto 0;
@@ -511,11 +639,11 @@
     width: max-content;
   }
   .app-header > div {
-    min-height: 4.2rem;
+    min-height: 3.8rem;
   }
   .brand-logo-compact {
-    width: 6.4rem;
-    height: 4rem;
+    width: 4.8rem;
+    height: 2.8rem;
   }
   .account-copy,
   .account-avatar {

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Heart,
   Plus,
@@ -7,7 +7,11 @@ import {
   MessageCircle,
   Users,
   Calendar,
+  ImagePlus,
+  Mic,
   Send,
+  Square,
+  Volume2,
 } from "lucide-react";
 import { useStore, store, useMounted, type TaskKind } from "@/lib/store";
 
@@ -26,6 +30,15 @@ export const Route = createFileRoute("/family")({
 });
 
 const EMOJIS = ["👩🏼", "👨🏻", "🧒🏻", "👧🏽", "👵🏻", "👴🏼", "👨🏾", "👩🏾", "🧑🏻", "👶🏻"];
+
+function readFileAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Could not read that file."));
+    reader.readAsDataURL(file);
+  });
+}
 
 function FamilyHub() {
   const mounted = useMounted();
@@ -79,7 +92,11 @@ function FamilyHub() {
         <div className="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {family.map((f) => (
             <div key={f.id} className="card-soft p-5 flex gap-4">
-              <div className="text-5xl">{f.emoji}</div>
+              {f.image ? (
+                <img src={f.image} alt="" className="family-photo" />
+              ) : (
+                <div className="family-photo-placeholder">{f.emoji}</div>
+              )}
               <div className="flex-1">
                 <div className="font-display text-xl">{f.name}</div>
                 <div className="text-sm text-muted-foreground">
@@ -150,6 +167,64 @@ function SendTaskCard() {
   const [kind, setKind] = useState<TaskKind>("family-message");
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
+  const [voiceNote, setVoiceNote] = useState("");
+  const [recording, setRecording] = useState(false);
+  const [voiceError, setVoiceError] = useState("");
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
+
+  async function startRecording() {
+    setVoiceError("");
+    if (
+      !navigator.mediaDevices?.getUserMedia ||
+      typeof MediaRecorder === "undefined"
+    ) {
+      setVoiceError("Voice recording is not available in this browser.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+      recorder.ondataavailable = (event) => {
+        if (event.data.size) chunks.push(event.data);
+      };
+      recorder.onstop = async () => {
+        const blob = new Blob(chunks, {
+          type: recorder.mimeType || "audio/webm",
+        });
+        if (blob.size > 10_000_000) {
+          setVoiceError("Keep voice notes under 10 MB.");
+        } else {
+          setVoiceNote(
+            await readFileAsDataUrl(
+              new File([blob], "voice-note.webm", { type: blob.type }),
+            ),
+          );
+        }
+        stream.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      };
+      streamRef.current = stream;
+      recorderRef.current = recorder;
+      recorder.start();
+      setRecording(true);
+    } catch {
+      setVoiceError("Microphone access was not available.");
+    }
+  }
+
+  function stopRecording() {
+    recorderRef.current?.stop();
+    recorderRef.current = null;
+    setRecording(false);
+  }
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -158,10 +233,13 @@ function SendTaskCard() {
       kind,
       title: title.trim(),
       detail: detail.trim() || undefined,
+      voiceNote: voiceNote || undefined,
       assignedBy: from,
     });
     setTitle("");
     setDetail("");
+    setVoiceNote("");
+    setVoiceError("");
   }
 
   return (
@@ -218,6 +296,65 @@ function SendTaskCard() {
           className="input min-h-24"
         />
       </Field>
+
+      <div className="mt-4 rounded-xl border border-border bg-secondary/35 p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div className="text-sm font-semibold flex items-center gap-2">
+              <Volume2 className="size-4 text-accent" /> Voice note
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Record a short hello or attach an audio file.
+            </p>
+          </div>
+          {!recording ? (
+            <button
+              type="button"
+              onClick={startRecording}
+              className="btn-large py-2 px-3 text-sm bg-card border border-border"
+            >
+              <Mic className="size-4" /> Record
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={stopRecording}
+              className="btn-large py-2 px-3 text-sm bg-destructive text-white"
+            >
+              <Square className="size-3.5 fill-current" /> Stop
+            </button>
+          )}
+        </div>
+        <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-primary">
+          <ImagePlus className="size-4" /> Attach audio file
+          <input
+            type="file"
+            accept="audio/*"
+            className="sr-only"
+            onChange={async (event) => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              if (file.size > 10_000_000) {
+                setVoiceError("Keep voice notes under 10 MB.");
+                return;
+              }
+              setVoiceError("");
+              setVoiceNote(await readFileAsDataUrl(file));
+            }}
+          />
+        </label>
+        {voiceNote && (
+          <audio
+            controls
+            src={voiceNote}
+            className="voice-note-preview"
+            aria-label="Voice note preview"
+          />
+        )}
+        {voiceError && (
+          <p className="mt-2 text-xs text-destructive">{voiceError}</p>
+        )}
+      </div>
 
       <button
         type="submit"
@@ -307,6 +444,7 @@ function AddMemberCard() {
   const [relation, setRelation] = useState("");
   const [note, setNote] = useState("");
   const [emoji, setEmoji] = useState(EMOJIS[0]);
+  const [image, setImage] = useState("");
 
   function add(e: React.FormEvent) {
     e.preventDefault();
@@ -316,10 +454,12 @@ function AddMemberCard() {
       relation: relation.trim() || "Family",
       note: note.trim() || undefined,
       emoji,
+      image: image || undefined,
     });
     setName("");
     setRelation("");
     setNote("");
+    setImage("");
     setOpen(false);
   }
 
@@ -348,6 +488,34 @@ function AddMemberCard() {
           </button>
         ))}
       </div>
+      <label className="mt-4 flex min-h-24 cursor-pointer items-center gap-3 rounded-xl border border-dashed border-border bg-secondary/35 px-4 py-3 text-sm font-semibold text-primary">
+        {image ? (
+          <img
+            src={image}
+            alt="Selected loved one"
+            className="family-photo family-photo-small"
+          />
+        ) : (
+          <ImagePlus className="size-5" />
+        )}
+        <span>
+          {image ? "Replace photo" : "Add their photo"}
+          <small className="block mt-0.5 font-normal text-muted-foreground">
+            JPG, PNG or HEIC · optional
+          </small>
+        </span>
+        <input
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          onChange={async (event) => {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            if (file.size > 8_000_000) return;
+            setImage(await readFileAsDataUrl(file));
+          }}
+        />
+      </label>
       <input
         value={name}
         onChange={(e) => setName(e.target.value)}

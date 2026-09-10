@@ -75,7 +75,15 @@ function FamilyFaces() {
   return (
     <GameShell title="Family Faces" instructions="Who is this?">
       <div className="card-soft p-10 text-center">
-        <div className="text-9xl">{current.emoji}</div>
+        {current.image ? (
+          <img
+            src={current.image}
+            alt=""
+            className="mx-auto family-photo family-photo-game"
+          />
+        ) : (
+          <div className="text-9xl">{current.emoji}</div>
+        )}
         <div className="mt-3 text-muted-foreground">{current.relation}</div>
         {current.note && (
           <div className="mt-3 text-sm text-muted-foreground italic max-w-md mx-auto">

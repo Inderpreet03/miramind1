@@ -7,6 +7,7 @@ export type FamilyMember = {
   emoji: string;
   note?: string;
   birthday?: string;
+  image?: string;
 };
 
 export type TaskKind =
@@ -22,6 +23,7 @@ export type FamilyTask = {
   kind: TaskKind;
   title: string;
   detail?: string;
+  voiceNote?: string;
   assignedBy: string;
   createdAt: number;
   completedAt?: number;
@@ -43,7 +45,7 @@ export type Resident = {
   streakDays: number;
 };
 
-type AppState = {
+export type AppState = {
   resident: Resident;
   family: FamilyMember[];
   tasks: FamilyTask[];
@@ -146,6 +148,14 @@ function load(userId: string | null): AppState {
   }
 }
 
+export type UserStateSummary = {
+  resident: Resident;
+  familyCount: number;
+  sessionsCount: number;
+  tasksCompleted: number;
+  lastSessionAt: number | null;
+};
+
 let activeUserId: string | null = null;
 let state: AppState = copySeed();
 const serverState = copySeed();
@@ -163,6 +173,16 @@ export const store = {
   subscribe: (cb: () => void) => {
     listeners.add(cb);
     return () => listeners.delete(cb);
+  },
+  summaryFor(userId: string): UserStateSummary {
+    const userState = load(userId);
+    return {
+      resident: userState.resident,
+      familyCount: userState.family.length,
+      sessionsCount: userState.sessions.length,
+      tasksCompleted: userState.tasks.filter((task) => task.completedAt).length,
+      lastSessionAt: userState.sessions[0]?.at ?? null,
+    };
   },
   activateUser(userId: string) {
     if (activeUserId === userId) return;

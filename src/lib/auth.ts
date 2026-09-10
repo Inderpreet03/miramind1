@@ -9,8 +9,10 @@ export type UserAccount = {
   createdAt: number;
 };
 
+export type PublicUserAccount = Omit<UserAccount, "pinHash">;
+
 type AuthState = {
-  user: Omit<UserAccount, "pinHash"> | null;
+  user: PublicUserAccount | null;
 };
 
 const ACCOUNTS_KEY = "miramind-accounts-v1";
@@ -61,6 +63,9 @@ export const authStore = {
   subscribe(callback: () => void) {
     listeners.add(callback);
     return () => listeners.delete(callback);
+  },
+  listAccounts(): PublicUserAccount[] {
+    return readAccounts().map(({ pinHash: _pinHash, ...account }) => account);
   },
   async signUp(name: string, email: string, pin: string) {
     const normalizedEmail = email.trim().toLowerCase();
